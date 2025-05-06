@@ -1,11 +1,740 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Manage Blogs - HealthCare</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome CDN -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet" />
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
+  <!-- SweetAlert2 CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- Bootstrap CSS (for modal) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <!-- Custom CSS -->
+  <style>
+    @tailwind base;
+    @tailwind components;
+    @tailwind utilities;
+
+    :root {
+      --primary: #c56bb9;
+      --primary-hover: #c75cb9;
+      --bg-dark: #ffffff;
+      --text-muted: #d429aa;
+      --white: #000000;
+      --light: rgb(255, 255, 255);
+      --radius: 0.5rem;
+      --transition: 0.3s ease;
+      --black: #000000;
+      --text-secondary: #151618;
+      --card-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+      --hover-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .dark-theme {
+      --primary: #925dce;
+      --primary-hover: #6924b9;
+      --bg-dark: #040507;
+      --text-muted: #87429e;
+      --white: #ffffff;
+      --light: #f5f6fa;
+      --black: #ffffff;
+      --text-secondary: #495057;
+      --card-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+      --hover-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--light);
+      color: var(--white);
+      transition: background-color var(--transition), color var(--transition);
+    }
+
+    .main-btn {
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius);
+      font-weight: 600;
+      transition: background-color var(--transition), transform var(--transition);
+    }
+
+    .primary-btn {
+      background-color: var(--primary);
+      color: var(--black);
+      border: none;
+    }
+
+    .primary-btn.btn-hover:hover {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+    }
+
+    .danger-btn {
+      background-color: #dc3545;
+      color: #ffffff;
+      border: none;
+    }
+
+    .danger-btn.btn-hover:hover {
+      background-color: #c82333;
+      transform: translateY(-2px);
+    }
+
+    .card {
+      background-color: var(--bg-dark);
+      box-shadow: var(--card-shadow);
+      transition: transform var(--transition);
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--hover-shadow);
+    }
+
+    .card-body {
+      color: var(--text-secondary);
+    }
+
+    .card-title {
+      color: var(--white);
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    .card-text {
+      color: var(--text-muted);
+    }
+
+    .modal-content {
+      background-color: var(--bg-dark);
+      color: var(--white);
+      border: 1px solid var(--primary);
+    }
+
+    .modal-header,
+    .modal-footer {
+      border-color: var(--primary);
+    }
+
+    .form-control {
+      background-color: var(--light);
+      color: var(--black);
+      border-color: var(--primary);
+    }
+
+    .form-control:focus {
+      border-color: var(--primary-hover);
+      box-shadow: 0 0 0 0.2rem rgba(197, 107, 185, 0.25);
+    }
+
+    .form-label {
+      color: var(--white);
+    }
+
+    .content-editable {
+      border: 1px solid #ced4da;
+      border-radius: 4px;
+      padding: 10px;
+      min-height: 100px;
+      font-size: 16px;
+      line-height: 1.6;
+      background: #fff;
+      overflow-y: auto;
+    }
+
+    .content-editable:focus {
+      outline: none;
+      border-color: #007bff;
+      box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+    }
+
+    .content-editable:empty:before {
+      content: attr(placeholder);
+      color: #6c757d;
+    }
+
+    .popup-bar {
+      position: absolute;
+      background: #333;
+      color: #fff;
+      border-radius: 5px;
+      padding: 5px 10px;
+      display: none;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+      align-items: center;
+    }
+
+    .popup-bar select,
+    .popup-bar button {
+      background: none;
+      border: none;
+      color: #fff;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .popup-bar select:hover,
+    .popup-bar button:hover {
+      background: #555;
+      border-radius: 3px;
+    }
+
+    .highlight {
+      background-color: yellow;
+    }
+  </style>
 </head>
-<body>
-    <h1>hello</h1>
+<body class="light-theme">
+  <div class="container mx-auto px-4 py-8">
+    <!-- Blog Upload Form -->
+    <section class="mb-12">
+      <h2 class="text-3xl font-bold text-[var(--primary)] text-center mb-6">Create New Blog Post</h2>
+      <form id="blogForm" class="bg-[var(--bg-dark)] p-6 rounded-lg shadow-lg max-w-2xl mx-auto">
+        <div class="mb-4">
+          <label for="title" class="block text-[var(--white)] font-medium mb-2">Title</label>
+          <input
+            type="text"
+            id="title"
+            class="w-full p-2 rounded border border-[var(--primary)] bg-[var(--light)] text-[var(--black)]"
+            required
+          />
+        </div>
+        <div class="mb-4">
+          <label for="metaDescription" class="block text-[var(--white)] font-medium mb-2">Meta Description</label>
+          <textarea
+            id="metaDescription"
+            class="w-full p-2 rounded border border-[var(--primary)] bg-[var(--light)] text-[var(--black)]"
+            rows="3"
+            required
+          ></textarea>
+        </div>
+        <div class="mb-4">
+          <label for="author" class="block text-[var(--white)] font-medium mb-2">Author</label>
+          <input
+            type="text"
+            id="author"
+            class="w-full p-2 rounded border border-[var(--primary)] bg-[var(--light)] text-[var(--black)]"
+            required
+          />
+        </div>
+        <div class="mb-4">
+          <label for="image1" class="block text-[var(--white)] font-medium mb-2">Primary Image</label>
+          <input
+            type="file"
+            id="image1"
+            accept="image/*"
+            class="w-full p-2 rounded border border-[var(--primary)] bg-[var(--light)] text-[var(--black)]"
+            required
+          />
+        </div>
+        <div class="mb-4">
+          <label for="content1" class="block text-[var(--white)] font-medium mb-2">Primary Content</label>
+          <div
+            contenteditable="true"
+            class="content-editable"
+            id="content1"
+            placeholder="Primary Content"
+          ></div>
+        </div>
+        <div class="mb-4">
+          <label for="image2" class="block text-[var(--white)] font-medium mb-2">Secondary Image</label>
+          <input
+            type="file"
+            id="image2"
+            accept="image/*"
+            class="w-full p-2 rounded border border-[var(--primary)] bg-[var(--light)] text-[var(--black)]"
+            required
+          />
+        </div>
+        <div class="mb-4">
+          <label for="content2" class="block text-[var(--white)] font-medium mb-2">Secondary Content</label>
+          <div
+            contenteditable="true"
+            class="content-editable"
+            id="content2"
+            placeholder="Secondary Content"
+          ></div>
+        </div>
+        <div class="popup-bar" id="createPopupBar">
+          <select id="createHeadingDropdown" onchange="applyHeading(this.value, 'createPopupBar')">
+            <option value="" disabled selected>Select Heading</option>
+            <option value="h1">H1</option>
+            <option value="h2">H2</option>
+            <option value="h3">H3</option>
+            <option value="h4">H4</option>
+            <option value="h5">H5</option>
+            <option value="h6">H6</option>
+          </select>
+          <button onclick="highlightText('createPopupBar')">Highlight</button>
+        </div>
+        <button
+          type="submit"
+          class="main-btn primary-btn btn-hover w-full py-2 rounded font-semibold"
+          onclick="uploadBlog()"
+        >
+          Submit Blog
+        </button>
+      </form>
+    </section>
+
+    <!-- Search and Blog Display -->
+    <section>
+      <div class="flex justify-center mb-6">
+        <input
+          type="text"
+          id="searchBlogInput"
+          placeholder="Search by blog title..."
+          class="p-2 rounded-l-lg border border-[var(--primary)] w-64"
+        />
+        <button
+          id="searchBlog"
+          class="main-btn primary-btn btn-hover px-4 py-2 rounded-r-lg"
+        >
+          <i class="fas fa-search"></i> Search
+        </button>
+      </div>
+      <div id="blog-container" class="mt-8"></div>
+    </section>
+  </div>
+
+  <!-- Edit Modal -->
+  <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Edit Blog</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="form-elements-wrapper">
+            <div class="row">
+              <div class="col-lg-12">
+                <form id="editBlogForm" class="card-style mb-30">
+                  <input type="hidden" id="editBlogId" />
+                  <h6 class="mb-25">Input Fields</h6>
+                  <div class="input-style-1">
+                    <label>Title</label>
+                    <input type="text" placeholder="Title" id="editTitle" required />
+                  </div>
+                  <div class="input-style-1">
+                    <label>Meta Description</label>
+                    <input type="text" placeholder="Meta Description" id="editMetaDescription" required />
+                  </div>
+                  <div class="input-style-2">
+                    <label>Author Name</label>
+                    <input type="text" placeholder="Author Name" id="editAuthor" required />
+                    <span class="icon"><i class="lni lni-user"></i></span>
+                  </div>
+                  <div class="input-style-2">
+                    <label>Image - 1</label>
+                    <input type="file" accept="image/*" id="editImage1" />
+                  </div>
+                  <div class="input-style-1">
+                    <label>Content - 1</label>
+                    <div contenteditable="true" class="content-editable" id="editContent1" placeholder="Primary Content"></div>
+                  </div>
+                  <div class="input-style-2">
+                    <label>Image - 2</label>
+                    <input type="file" accept="image/*" id="editImage2" />
+                  </div>
+                  <div class="input-style-1">
+                    <label>Content - 2</label>
+                    <div contenteditable="true" class="content-editable" id="editContent2" placeholder="Secondary Content"></div>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+          <div class="popup-bar" id="editPopupBar">
+            <select id="editHeadingDropdown" onchange="applyHeading(this.value, 'editPopupBar')">
+              <option value="" disabled selected>Select Heading</option>
+              <option value="h1">H1</option>
+              <option value="h2">H2</option>
+              <option value="h3">H3</option>
+              <option value="h4">H4</option>
+              <option value="h5">H5</option>
+              <option value="h6">H6</option>
+            </select>
+            <button onclick="highlightText('editPopupBar')">Highlight</button>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" onclick="updateBlog()">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    async function uploadBlog() {
+      event.preventDefault();
+
+      let title = document.getElementById("title").value;
+      let metaDescription = document.getElementById("metaDescription").value;
+      let author = document.getElementById("author").value;
+      let image1 = document.getElementById("image1").files[0];
+      let content1 = document.getElementById("content1").innerHTML;
+      let image2 = document.getElementById("image2").files[0];
+      let content2 = document.getElementById("content2").innerHTML;
+
+      if (!image1 || !image2) {
+        Swal.fire({
+          title: "Missing Image!",
+          text: "Please upload both images before submitting.",
+          icon: "warning",
+        });
+        return;
+      }
+
+      let formData = new FormData();
+      formData.append("title", title);
+      formData.append("metaDescription", metaDescription);
+      formData.append("author", author);
+      formData.append("image1", image1);
+      formData.append("content1", content1);
+      formData.append("image2", image2);
+      formData.append("content2", content2);
+
+      try {
+        let response = await fetch("http://192.168.1.8:5000/api/blogs", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (response.ok) {
+          Swal.fire({
+            title: "Success!",
+            text: "Blog post successfully added!",
+            icon: "success",
+          }).then(() => {
+            document.getElementById("blogForm").reset();
+            document.getElementById("content1").innerHTML = "";
+            document.getElementById("content2").innerHTML = "";
+            fetchBlogs();
+          });
+        } else {
+          Swal.fire({
+            title: "Failed!",
+            text: "Failed to add blog post.",
+            icon: "error",
+          });
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        Swal.fire({
+          title: "Error!",
+          text: "An error occurred. Please try again!",
+          icon: "error",
+        });
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", fetchBlogs);
+
+    async function fetchBlogs() {
+      try {
+        const response = await fetch("http://192.168.1.8:5000/api/blogs");
+        const blogs = await response.json();
+        displayBlogs(blogs);
+      } catch (error) {
+        console.error("Error loading blogs:", error);
+      }
+    }
+
+    function displayBlogs(blogs) {
+      const blogContainer = document.getElementById("blog-container");
+      blogContainer.innerHTML = "";
+
+      blogs.forEach((blog, index) => {
+        if (index % 3 === 0) {
+          const newRow = document.createElement("div");
+          newRow.className = "row mb-4";
+          blogContainer.appendChild(newRow);
+        }
+
+        const row = blogContainer.lastElementChild;
+        const col = document.createElement("div");
+        col.className = "col-md-4 mb-4";
+
+        col.innerHTML = `
+          <div class="card h-100" style="border: none; transition: transform 0.3s;">
+            <a href="/blog-details?id=${blog._id}" class="text-decoration-none text-dark">
+              <div style="height: 200px; overflow: hidden;">
+                <img src="http://localhost:5000/${blog.image1}"
+                     class="img-fluid w-100 h-100"
+                     style="object-fit: cover;"
+                     alt="${blog.title}">
+              </div>
+              <div class="card-body p-3" style="height: 200px; overflow: hidden;">
+                <h6 class="card-title">${blog.title}</h6>
+                <small class="text-muted d-block mb-2">
+                  By ${blog.author} | ${new Date(blog.createdAt).toLocaleDateString()}
+                </small>
+                <p class="card-text" style="font-size: 0.9rem; height: calc(100% - 50px); overflow: hidden; text-align: justify;">
+                  ${blog.content1.replace(/<[^>]+>/g, '').substring(0, 200)}...
+                </p>
+              </div>
+            </a>
+            <div class="card-footer bg-transparent border-top-0">
+              <button class="main-btn primary-btn btn-hover" data-bs-toggle="modal" data-bs-target="#editModal" onclick="editModal('${blog._id}')">Edit</button>
+              <button class="main-btn danger-btn btn-hover" onclick="deleteBlog('${blog._id}')">Delete</button>
+            </div>
+          </div>`;
+
+        row.appendChild(col);
+      });
+    }
+
+    const searchButton = document.getElementById("searchBlog");
+    searchButton.addEventListener("click", searchBlog);
+    document.getElementById("searchBlogInput").addEventListener("keydown", (e) => {
+      if (e.code === "Enter") {
+        searchBlog();
+      }
+    });
+
+    async function searchBlog() {
+      try {
+        const searchBlogInput = document.getElementById("searchBlogInput");
+        const inputValue = searchBlogInput.value.trim().toLowerCase();
+        const blogContainer = document.getElementById("blog-container");
+
+        if (inputValue === "") {
+          Swal.fire({
+            title: "Input Required!",
+            text: "Please enter a title to search.",
+            icon: "warning",
+          });
+          return;
+        }
+
+        const response = await fetch("http://192.168.1.8:5000/api/blogs");
+        const allBlogs = await response.json();
+
+        const matchedBlogs = allBlogs.filter((blog) =>
+          blog.title.toLowerCase().includes(inputValue)
+        );
+
+        blogContainer.innerHTML = "";
+
+        if (matchedBlogs.length === 0) {
+          blogContainer.innerHTML = "<p class='text-[var(--white)] text-center'>No blog found with that title.</p>";
+          return;
+        }
+
+        displayBlogs(matchedBlogs);
+      } catch (error) {
+        console.error("Error searching blog:", error);
+        Swal.fire({
+          title: "Error!",
+          text: "Failed to search blogs.",
+          icon: "error",
+        });
+      }
+    }
+
+    async function editModal(blogId) {
+      try {
+        const response = await fetch(`http://192.168.1.8:5000/api/blogs/${blogId}`);
+        const blog = await response.json();
+
+        document.getElementById("editBlogId").value = blog._id;
+        document.getElementById("editTitle").value = blog.title;
+        document.getElementById("editMetaDescription").value = blog.metaDescription;
+        document.getElementById("editAuthor").value = blog.author;
+        document.getElementById("editContent1").innerHTML = blog.content1;
+        document.getElementById("editContent2").innerHTML = blog.content2;
+      } catch (error) {
+        console.error("Error fetching blog:", error);
+        Swal.fire({
+          title: "Error!",
+          text: "Failed to load blog data.",
+          icon: "error",
+        });
+      }
+    }
+
+    async function updateBlog() {
+      event.preventDefault();
+
+      const blogId = document.getElementById("editBlogId").value;
+      const title = document.getElementById("editTitle").value;
+      const metaDescription = document.getElementById("editMetaDescription").value;
+      const author = document.getElementById("editAuthor").value;
+      const image1 = document.getElementById("editImage1").files[0];
+      const content1 = document.getElementById("editContent1").innerHTML;
+      const image2 = document.getElementById("editImage2").files[0];
+      const content2 = document.getElementById("editContent2").innerHTML;
+
+      let formData = new FormData();
+      formData.append("title", title);
+      formData.append("metaDescription", metaDescription);
+      formData.append("author", author);
+      if (image1) formData.append("image1", image1);
+      formData.append("content1", content1);
+      if (image2) formData.append("image2", image2);
+      formData.append("content2", content2);
+
+      try {
+        const response = await fetch(`http://192.168.1.8:5000/api/blogs/${blogId}`, {
+          method: "PUT",
+          body: formData,
+        });
+
+        if (response.ok) {
+          Swal.fire({
+            title: "Success!",
+            text: "Blog post successfully updated!",
+            icon: "success",
+          }).then(() => {
+            document.getElementById("editBlogForm").reset();
+            document.getElementById("editContent1").innerHTML = "";
+            document.getElementById("editContent2").innerHTML = "";
+            const modal = bootstrap.Modal.getInstance(document.getElementById("editModal"));
+            modal.hide();
+            fetchBlogs();
+          });
+        } else {
+          Swal.fire({
+            title: "Failed!",
+            text: "Failed to update blog post.",
+            icon: "error",
+          });
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        Swal.fire({
+          title: "Error!",
+          text: "An error occurred. Please try again!",
+          icon: "error",
+        });
+      }
+    }
+
+    async function deleteBlog(blogId) {
+      if (!confirm("Are you sure you want to delete this blog post?")) return;
+
+      try {
+        const response = await fetch(`http://192.168.1.8:5000/api/blogs/${blogId}`, {
+          method: "DELETE",
+        });
+
+        if (response.ok) {
+          Swal.fire({
+            title: "Success!",
+            text: "Blog post successfully deleted!",
+            icon: "success",
+          }).then(() => {
+            fetchBlogs();
+          });
+        } else {
+          Swal.fire({
+            title: "Failed!",
+            text: "Failed to delete blog post.",
+            icon: "error",
+          });
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        Swal.fire({
+          title: "Error!",
+          text: "An error occurred. Please try again!",
+          icon: "error",
+        });
+      }
+    }
+
+    // Popup functionality for both create and edit forms
+    const popupBars = {
+      createPopupBar: ['content1', 'content2'],
+      editPopupBar: ['editContent1', 'editContent2']
+    };
+
+    let selectedText = '';
+
+    document.addEventListener('mouseup', (e) => {
+      const target = e.target;
+      for (const [popupId, contentAreas] of Object.entries(popupBars)) {
+        if (contentAreas.some(id => target.id === id || target.closest(`#${id}`))) {
+          const selection = window.getSelection();
+          selectedText = selection.toString().trim();
+
+          if (selectedText) {
+            const range = selection.getRangeAt(0);
+            const rect = range.getBoundingClientRect();
+            const popupBar = document.getElementById(popupId);
+
+            popupBar.style.display = 'flex';
+            popupBar.style.top = `${rect.top + window.scrollY - 40}px`;
+            popupBar.style.left = `${rect.left + (rect.width / 2) - (popupBar.offsetWidth / 2)}px`;
+
+            // Reset dropdown to default
+            document.getElementById(popupId === 'createPopupBar' ? 'createHeadingDropdown' : 'editHeadingDropdown').value = '';
+          } else {
+            document.getElementById(popupId).style.display = 'none';
+          }
+          break;
+        }
+      }
+    });
+
+    document.addEventListener('mousedown', (e) => {
+      const target = e.target;
+      const isInContentArea = Object.values(popupBars).flat().some(id => target.id === id || target.closest(`#${id}`));
+      const isInPopup = Object.keys(popupBars).some(id => document.getElementById(id).contains(target));
+      if (!isInContentArea && !isInPopup) {
+        Object.keys(popupBars).forEach(id => {
+          document.getElementById(id).style.display = 'none';
+        });
+      }
+    });
+
+    function applyHeading(headingTag, popupId) {
+      const selection = window.getSelection();
+      if (!selection.rangeCount) return;
+
+      const range = selection.getRangeAt(0);
+      const heading = document.createElement(headingTag);
+      heading.textContent = selectedText;
+
+      range.deleteContents();
+      range.insertNode(heading);
+
+      document.getElementById(popupId).style.display = 'none';
+      selection.removeAllRanges();
+    }
+
+    function highlightText(popupId) {
+      const selection = window.getSelection();
+      if (!selection.rangeCount) return;
+
+      const range = selection.getRangeAt(0);
+      const span = document.createElement('span');
+      span.className = 'highlight';
+      range.surroundContents(span);
+
+      document.getElementById(popupId).style.display = 'none';
+      selection.removeAllRanges();
+    }
+
+    // Prevent Enter key from submitting form in contenteditable divs
+    document.querySelectorAll('.content-editable').forEach(div => {
+      div.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          document.execCommand('insertLineBreak');
+        }
+      });
+    });
+  </script>
 </body>
 </html>
